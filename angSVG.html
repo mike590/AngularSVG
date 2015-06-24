@@ -1,0 +1,97 @@
+<html ng-app="logo">
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+  </head>
+  <body>
+
+    <div ng-controller="squareCtrl">
+      Width
+      <input type='range' ng-model='width' value='{{ width }}' min="0" max ="400">
+      Height
+      <input type='range' ng-model='height' value='{{ height }}' min="0" max ="400">
+      Offset
+      <input type='range' ng-model='offset' value='{{ offset }}' id="offset" min="0" max ="200" step="1">
+      RPS
+      <input type='range' ng-model='rps' value='{{ rps }}' min="0" max ="3" step=".05">
+      <svg height='500' width='500'>
+        <g id='canvas'>
+          <!-- top left corner -->
+          <line x1='0' y1='{{(offset/100*height)}}' x2='{{(offset/100*width)}}' y2='0' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- top right corner -->
+          <line x1='{{width - (offset/100*width)}}' y1='0' x2='{{width}}' y2='{{0 + (offset/100*height)}}' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- bottom left corner -->
+          <line x1='0' y1='{{height - (offset/100*height)}}' x2='{{(offset/100*width)}}' y2='{{height}}' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- bottom right corner -->
+          <line x1='{{width - (offset/100*width)}}' y1='{{height}}' x2='{{width}}' y2='{{height - (offset/100*height)}}' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- diagonal 1 -->
+          <line x1='0' y1='{{(offset/100*height)}}' x2='{{(offset/100*width)}}' y2='{{height}}' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- diagonal 2 -->
+          <line x1='{{width - (offset/100*width)}}' y1='{{height}}' x2='{{width}}' y2='{{0 + (offset/100*height)}}' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- diagonal 3 -->
+          <line x1='0' y1='{{height - (offset/100*height)}}' x2='{{width - (offset/100*width)}}' y2='0' style='stroke:rgb(255,0,0);stroke-width:2' />
+          <!-- diagonal 4 -->
+          <line x1='{{width}}' y1='{{height - (offset/100*height)}}' x2='{{(offset/100*width)}}' y2='0' style='stroke:rgb(255,0,0);stroke-width:2' />
+        </g>
+      </svg>
+      <button ng-click='logData()'>Data</button>
+      <button ng-click='rotate()' ng-hide="rotation.rotate">Rotate</button>
+      <button ng-click='funRotate()' ng-hide="rotation.rotate">Fun Rotate</button>
+      <button ng-click='stopRotation()' ng-show="rotation.rotate">Stop Rotation</button>
+
+    </div>
+
+  </body>
+</html>
+
+
+<script>
+  
+  var app = angular.module('logo', []);
+
+  app.controller("squareCtrl", ["$scope", function($scope){
+    $scope.width = 400;
+    $scope.height = 400;
+    $scope.offset = 20;
+    $scope.rps = 0.2;
+    $scope.degrees = 0;
+    $scope.rotation = {rotate: false};
+    $scope.logData = function(){
+      console.log("Width: " + $scope.width);
+      console.log("Height: " + $scope.height);
+      console.log("Offset: " + $scope.offset);
+      console.log("RPS: " + $scope.rps);
+    };
+    $scope.rotate = function(){
+      var canvas = document.getElementById('canvas');
+      $scope.rotation.rotate = true;
+      $scope.rotation.interval = setInterval(function(){
+        var increment = (360 * $scope.rps)/50;
+        $scope.degrees = $scope.degrees + increment > 360 ? 0 : $scope.degrees + increment;
+        canvas.setAttribute('transform', 'rotate(' + $scope.degrees + ', ' + $scope.width/2 +', ' + $scope.height/2 + ')');
+      }, 20);
+    };
+    $scope.funRotate = function(){
+      var canvas = document.getElementById('canvas');
+      $scope.rotation.rotate = true;
+      var rise = true;
+      $scope.rotation.interval = setInterval(function(){
+        if($scope.offset > 200){
+          rise = false;
+        } else if($scope.offset < 0){
+          rise = true;
+        }
+        $scope.offset = parseInt($scope.offset) + (rise ? 2 : -2);
+        $scope.$apply();
+        var increment = (360 * $scope.rps)/50;
+        $scope.degrees = $scope.degrees + increment > 360 ? 0 : $scope.degrees + increment;
+        canvas.setAttribute('transform', 'rotate(' + $scope.degrees + ', ' + $scope.width/2 +', ' + $scope.height/2 + ')');
+      }, 20);
+    };
+    $scope.stopRotation = function(){
+      $scope.rotation.rotate = false;
+      clearInterval($scope.rotation.interval);
+    };
+
+  }]);
+
+</script>
